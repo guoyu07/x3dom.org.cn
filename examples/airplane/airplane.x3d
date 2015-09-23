@@ -1,0 +1,11 @@
+  <scene DEF='scene'>
+	<shape>
+		<appearance>
+			<textureTransform scale='1.36 1'></textureTransform>
+			<imageTexture id="colMapTex" url='"map-banded.png"' repeatS="false" repeatT="false"></imageTexture>                
+			<material specularColor='0.6 0.6 0.6'></material>
+		</appearance>
+		<binaryGeometry DEF='BG_0' vertexCount='104208' primType='"TRIANGLES"' position='0 4.66000032425 -1.94499969482' size='26.6399993896 7.97999858856 26.4899997711' index='binGeoBG_0_indexBinary.bin' coord='binGeoBG_0_coordNormalBinary.bin+8' texCoord='binGeoBG_0_texCoordBinary.bin+4' coordType='Uint16' texCoordType='Uint16' normalAsSphericalCoordinates='true'></binaryGeometry>
+	</shape>
+	<viewpoint position="22.33237 -6.97520 7.83083" orientation="0.27792 0.93735 -0.21009 1.27742"></viewpoint>
+  </scene>

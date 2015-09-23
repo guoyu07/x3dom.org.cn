@@ -1,0 +1,10 @@
+  <scene DEF='scene'>
+	<shape DEF='SP_0'>
+	  <appearance>
+		<material diffuseColor='0.8 0.8 0.8' specularColor='0.6 0.6 0.6'></material>
+	  </appearance>
+	  <binaryGeometry DEF='BG_0' vertexCount='2958' primType='"TRIANGLES"' position='-0.0169184952974 0.109919495881 -0.00178049877286' size='0.15554100275 0.153864994645 0.119515001774' index='binGeo/BG_0_indexBinary.bin' coord='binGeo/BG_0_coordNormalBinary.bin+8' coordType='Uint16' normalAsSphericalCoordinates='true'></binaryGeometry>
+	</shape>
+	<viewpoint position="-0.11035 0.13868 0.29626" orientation="-0.46858 -0.88307 0.02484 0.36513"
+			   centerOfRotation="-0.020107727352361326 0.03747726230434853 0.016535706229916985"></viewpoint>
+  </scene>

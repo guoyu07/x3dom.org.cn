@@ -1,0 +1,26 @@
+  <scene>
+  
+	<navigationInfo type='"EXAMINE" "TURNTABLE" "ANY""'></navigationInfo>
+  
+	<viewpoint position="-4.80028 1.48277 2.16400" orientation="-0.20225 -0.96913 -0.14100 1.17740" centerOfRotation="0 0 0"></viewpoint>
+
+	<transform DEF='X3DOM_BOX_TRANSFORM' rotation='1 0 0 -1.5707'>
+		<transform DEF='TEXT_TRANSFORM' rotation='-0.57735 0.57735 -0.57735 2.09439' scale='-0.63801 -0.63801 -0.63801' translation='0.986547 -1.01227 -0.129052'>  
+		  <shape DEF='SP_0'>
+			<appearance>
+			  <material DEF='TEXT_MAT' ambientIntensity='0.333' diffuseColor='1 1 1' shininess='0.098' specularColor='0.401 0.401 0.401'></material>
+			</appearance>
+			<binaryGeometry DEF='BG_0' solid='false' vertexCount='13714 5757' primType='"TRIANGLESTRIP" "TRIANGLES"' position='1.36801695824 0.340999990702 1.52926838398' size='3.27853798866 0.699999988079 3.27853679657' index='binGeo/BG_0_indexBinary.bin' coord='binGeo/BG_0_coordNormalBinary.bin+8' coordType='Uint16' normalAsSphericalCoordinates='true'></binaryGeometry>
+		  </shape>
+		</transform>
+		<transform DEF='CUBE_TRANSFORM' rotation='0 0.707107 0.707107 3.14159' translation='0.025766 -0.149122 0.049603'>    
+		  <shape DEF='SP_1'>
+			<appearance>
+			  <material DEF='CUBE_MAT' ambientIntensity='0.0' diffuseColor='0.194 0.551 0.8' shininess='0.0' specularColor='0.0 0.0 0.0'></material>
+			</appearance>
+			<binaryGeometry DEF='BG_1' vertexCount='34' primType='"TRIANGLESTRIP"' size='2 2 2' index='binGeo/BG_1_indexBinary.bin' coord='binGeo/BG_1_coordNormalBinary.bin+8' coordType='Uint16' normalAsSphericalCoordinates='true'></binaryGeometry>
+		  </shape>
+		</transform>
+	</transform>
+	
+  </scene>
