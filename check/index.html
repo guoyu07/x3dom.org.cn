@@ -1,0 +1,1067 @@
+
+<!DOCTYPE html>
+
+<!--
+
+This file should detect which OS/Browser and plugin support is available.
+
+And then display a suggestion what to download or update. It should
+
+be as self-contained as possible avoiding too many requests.
+
+
+
+Portions of code from:
+
+http://www.quirksmode.org/js/detect.html
+
+http://get.webgl.org/
+
+
+
+X3DOM application requires a WebGL renderer
+
+Pass in information what the application requires index.html
+
+Send feedback mail with browser data, etc.
+
+-->
+
+<html>
+
+<head>
+
+	<title>X3DOM Help Wizard</title>
+
+    <meta http-equiv="X-UA-Compatible" content="chrome=1,IE=edge">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+    <link rel="stylesheet" href="normalize.css">
+
+    <link rel="stylesheet" href="/dev/x3dom.css">
+
+    <script src="http://ajax.useso.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+
+    <script src="https://ajax.useso.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+    <script type='text/javascript' src='/dev/x3dom.js'></script>
+
+    <script>window.jQuery || document.write('<script src="jquery-1.7.1.min.js"><\/script>')</script>
+
+    <script src="detect.js"></script>
+
+    
+
+    <style>
+
+        /* Style goes here */
+
+        body, html  { height: 100%; }
+
+        h1,h2,h3,h4 { text-rendering: optimizeLegibility; line-height:1.6em; }
+
+
+
+        body {
+
+            font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+
+            font-size: 1em;
+
+            line-height: 1.6em;
+
+            margin: 0;
+
+            padding: 0;
+
+            background: white;
+
+            color: #333;
+
+            text-align: center;
+
+        }
+
+
+
+        a,
+
+        a:visited,
+
+        a:active,
+
+        a:focus,
+
+        a:hover { text-decoration: none; }
+
+
+
+        a:hover  { color: white; background-color: #333; border-radius: 2px; padding: 2px; margin: -2px; }
+
+        
+
+        ol li {
+
+            list-style:none;
+
+        }
+
+        
+
+        #page    { height: 100%; overflow: visible; position: relative; }
+
+
+
+        #inner   {
+
+            position: relative;
+
+            top: 5%;
+
+            width: 80%;
+
+            margin: 0 auto;
+
+            /*box-shadow:0px 0px 40px rgba(0,0,0,0.2) ;*/
+
+            /*border-radius: 5px;*/
+
+            max-width:52em;
+
+        }
+
+
+
+        #footer { padding: 10px 20px 10px 20px; color:#999; font-size:0.6em; }
+
+
+
+        #footer a,
+
+        #footer a:hover,
+
+        #footer a:visited,
+
+        #footer a:active { font-weight: bold;  color: #777; }
+
+
+
+
+
+        .head   { padding: 1em; color:white; }
+
+        .head p { color: #333;}
+
+
+
+        .ok     { color: green; }
+
+
+
+        .critical,
+
+        .fatal { color: red; }
+
+
+
+        .warn {color:#ffcc00; font-weight:bold}
+
+        .head h1 {
+
+            font-weight: normal;
+
+            letter-spacing: -1px;
+
+            /*margin:0 0 10px 0;*/
+
+            /*padding: 0;*/
+
+            /*line-height:1em;*/
+
+         }
+
+
+
+        /*.head .info { font-size: 19px }*/
+
+        
+
+        #x3dom_logdiv {
+
+            text-align: left;
+
+            line-height: 1.2em;
+
+        }
+
+        .x3dom-statdiv {
+
+            margin: 0;
+
+            padding: 0;
+
+            right: 10px;
+
+            top: 10px;
+
+            position: absolute;
+
+            color: #0f0;
+
+            font-family: Helvetica, sans-serif;
+
+            line-height:10px;
+
+            font-size: 10px;
+
+            width: 75px;
+
+            height: 70px;
+
+            border: 0px;
+
+        }
+
+
+
+        .solution { padding: 10px 20px 20px 20px; margin: 0 auto; }
+
+        .solution h2 { margin: 1em 0 .5em 0; }
+
+        .solution h3 { margin: 1.6em 0 .8em 0; }
+
+        .solution a:hover { border-bottom:  1px solid  #21558c; }
+
+        .solution p { margin-bottom:1em; }
+
+        .solution p:last-child { margin-bottom:0; }
+
+
+
+        .hidden { display:none; }
+
+    </style>
+
+
+
+
+
+    <script>
+
+        $j = jQuery.noConflict();
+
+        $j(document).ready(function() {
+
+            var canvas;
+
+            var gl = null;
+
+
+
+            var has_web_gl = false, is_old_webgl = false, webgl_disabled = false;
+
+            var has_flash  = false, is_beta_webgl = false;
+
+            var x3d_element = null;
+
+            
+
+            b = BrowserDetect;
+
+            b.init();
+
+
+
+            $j('#no-javascript').hide();
+
+            $j("#support-link").attr('href', b.urls.troubleshootingUrl);
+
+
+
+            // info
+
+            $j('#info-browser-name').text(b.browser);
+
+            $j('#info-browser-version').text("v" + b.version);
+
+            
+
+            $j('#info-browser-name-old').text(b.browser);
+
+            $j('#info-browser-version-old').text("v" + b.version);
+
+
+
+
+
+            $j('#more-link').click(function() {
+
+                $j('#more-content').toggle();
+
+            });
+
+
+
+
+
+            if (b.browser == "Explorer") {
+
+                $j('#upgrade-browser').hide();
+
+                $j('#upgrade-chromeframe').show();
+
+            }
+
+
+
+            canvas = document.getElementById("x3dom-logo");
+
+
+
+            var validContextNames = ['moz-webgl', 'webkit-3d', 'experimental-webgl', 'webgl'];
+
+            
+
+            for (var i=0; i<validContextNames.length && !gl; i++) {
+
+                try {
+
+                    gl = canvas.getContext(validContextNames[i]);
+
+                    
+
+                    try {
+
+                        if (gl) {
+
+                            var tmp = gl.getSupportedExtensions();
+
+                        }
+
+                    }
+
+                    catch (x) {
+
+                        is_old_webgl = true;
+
+                    }
+
+                }
+
+                catch (x) {
+
+                    gl = null;
+
+                }
+
+            }
+
+
+
+            if (gl) {
+
+                // webgl works
+
+                has_web_gl = true;
+
+            } 
+
+            else if ("WebGLRenderingContext" in window) {
+
+                // probably too old driver or gpu
+
+                has_web_gl = false;
+
+                if (b.browser != "Safari" || b.platform == "Mac")
+
+                    webgl_disabled = true;
+
+            } 
+
+            else {
+
+                // no webgl
+
+                has_web_gl = false;
+
+            }
+
+            
+
+            if (has_web_gl)
+
+            {
+
+                var webglVersion = parseFloat(gl.getParameter(gl.VERSION).match(/\d+\.\d+/)[0]);
+
+                if (webglVersion < 1.0) {
+
+                    has_web_gl = true;
+
+                    is_beta_webgl = true;
+
+                }
+
+            }
+
+
+
+            // detect flash
+
+            if (swfobject.hasFlashPlayerVersion('11.0.0')) {
+
+                has_flash = true;
+
+            }
+
+            console.log("PUP");
+
+            var webgl_version = $j("#webgl-version");
+
+            if (has_web_gl) {
+
+                
+
+                
+
+                if (webglVersion < 1.0) {
+
+                    webgl_version.text("v" + webglVersion);
+
+                    webgl_version.addClass("warn");
+
+                } else {
+
+                    webgl_version.text("v" + webglVersion);
+
+                    webgl_version.addClass("ok");
+
+                }
+
+                    
+
+                $j("#bind-word").text(((has_flash) ? "and " : "but "));
+
+                
+
+                if (is_old_webgl) {
+
+                    has_web_gl = false; // invalid version found
+
+                    $j("#header-webgl-too-old").show();
+
+                }
+
+            }
+
+
+
+            var flash_version = $j("#flash-version");
+
+
+
+            if (has_flash) {       
+
+                flash_version.text("v" + swfobject.getFlashPlayerVersion().major);
+
+                flash_version.addClass("ok");
+
+            } else {     
+
+                flash_version.text("not");
+
+                flash_version.addClass("warn");
+
+            }
+
+
+
+            var isOldIE = false;
+
+            var ieAndVersion = 0;
+
+            
+
+            if (navigator.userAgent.indexOf("MSIE") >= 0) { 
+
+                ieAndVersion = parseFloat(navigator.appVersion.split("MSIE")[1]);
+
+                if (ieAndVersion < 9)
+
+                    isOldIE = true;
+
+            }
+
+
+
+            if (isOldIE || (!has_web_gl && !has_flash)) {
+
+                if (isOldIE || is_old_webgl) {
+
+                    $j("#header-too-old").show();
+
+                }
+
+                else if (webgl_disabled) {
+
+                    $j("#header-gl-disabled").show();
+
+                    $j("#header-webgl-disabled").show();
+
+                }
+
+                else {
+
+                    $j("#header-no-gl-flash").show();
+
+                }
+
+                $j("#no-webgl-no-flash").show();
+
+                
+
+                // Do we know the browser and can it be upgraded?
+
+                if (b.browser != "unknown" && b.urls.upgradeUrl) {
+
+                    // Yes, show the browser and the upgrade link.
+
+                    $j("#name").html(b.browser);
+
+                    $j("#upgrade-link").attr('href', b.urls.upgradeUrl);
+
+                } else {
+
+                    // No, so only the link for browser for this platform.
+
+                    randomizeBrowserList();
+
+                    $j("#upgrade-browser").hide();
+
+                    $j("#get-browser").show();
+
+                    $j("#platform").html(b.platform);
+
+                }
+
+            }
+
+            else {
+
+                $j("#all-go").show();
+
+
+
+                x3d_element = document.getElementById('logo');
+
+                x3dom.runtime.ready = function() {
+
+                    if (x3d_element.runtime.backendName() == 'flash') {
+
+                        $j('#using-flash').show();
+
+                    }
+
+                    else if (has_web_gl && b.browser == "Firefox") {
+
+                        $j('#using-wgl-ff').show();
+
+                    }
+
+                };
+
+            }
+
+
+
+
+
+            function randomizeBrowserList() {
+
+                var bl = $j("#browser-list");
+
+                var browsers = [];
+
+                var infos = b.platformInfo.browsers;
+
+                for (var ii = 0; ii < infos.length; ++ii) {
+
+                    browsers.push({
+
+                        info: infos[ii],
+
+                        weight: Math.random()
+
+                    });
+
+                }
+
+
+
+                browsers = browsers.sort(function(a, b) {
+
+                    if (a.weight < b.weight) return -1;
+
+                    if (a.weight > b.weight) return 1;
+
+                        return 0;
+
+                    });
+
+
+
+                    for (var ii = 0; ii < browsers.length; ++ii) {
+
+                        var info = browsers[ii].info;
+
+                        var div = document.createElement("p");
+
+                        var a = document.createElement("a");
+
+                        a.href = info.url;
+
+                        a.innerHTML = info.name;
+
+                        div.appendChild(a);
+
+                        bl.append(div);
+
+                    }
+
+                }
+
+
+
+        });
+
+    </script>
+
+
+
+</head>
+
+<body>
+
+<canvas id="x3dom-logo" style="display:none"></canvas>
+
+
+
+<div id="page"><div id="inner">
+
+
+
+    <!--
+
+    This section helps if javascript is off
+
+    TODO: fix copy, maybe screenshots
+
+    -->
+
+    <div id="no-javascript">
+
+
+
+        <div class="head fatal">
+
+            <h1>You must enable JavaScript in order to use&nbsp;X3DOM</h1>
+
+        </div>
+
+
+
+        <div class="solution">
+
+            <h2>Here is what you can do</h2>
+
+            <p>First, identify your browser. Then use the guidelines below to enable JavaScript for your&nbsp;browser.
+
+            If you are using an old browser the settings might slightly differ. If you cannot find the appropriate option
+
+            with the guidelines below, please consult the help system of your browser.</p>
+
+
+
+
+
+            <!--[if IE]>
+
+                <h3>Internet Explorer</h3>
+
+                <p>
+
+                    Go to the Settings menu and select "Options".
+
+                    In the dialog box go to the "Security" tab.
+
+                    Click the button "Custom Level...".
+
+                    In the "Scripting" section set the "Active scripting" option to "Enable".
+
+                </p>
+
+            <![endif]-->
+
+
+
+            <h3>Firefox</h3>
+
+            <p>
+
+                In the Firefox menu select "Options".
+
+                In the dialog that appears select the "Content" section.
+
+                Check the "Enable JavaScript" option.
+
+           </p>
+
+
+
+            <h3>Chrome</h3>
+
+            <ol>
+
+                <li>Go to the Chrome settings menu (dark wrench next to the URL bar).</li>
+
+                <li>Select "Preferences".</li>
+
+                <li>On the right, select the "Under the hood" tab.</li>
+
+                <li>In the Privacy area click on "Content Settings".</li>
+
+                <li>In the JavaScript section activate "Allow all sites to run JavaScript (recommended)".</li>
+
+
+
+            </ol>
+
+
+
+            <h3>Browser not listed here?</h3>
+
+            <p>Please see the reference manual of your browser in order to enable JavaScript.</p>
+
+        </div>
+
+    </div>
+
+
+
+      <div id="no-webgl-no-flash" class="hidden">
+
+          <div class="head critical">
+
+              <div id="header-too-old" class="hidden">
+
+                  <h1>Your browser <span id="info-browser-name-old"></span>&nbsp;version
+
+                    <span id="info-browser-version-old"></span>&nbsp;is too old</h1>
+
+                  <div id="header-webgl-too-old" class="hidden">
+
+                      Though your browser theoretically has WebGL, it is only an old or pre-alpha version of WebGL.
+
+                  </div>
+
+              </div>
+
+              <div id="header-no-gl-flash" class="hidden">
+
+                  <h1>Your browser does not know WebGL and has no compatible Flash installed</h1>
+
+              </div>
+
+              <div id="header-gl-disabled" class="hidden">
+
+                  <h1>Your browser seems to support WebGL, but it is disabled or unavailable, and there is also no compatible Flash installed</h1>
+
+                  <div id="header-webgl-disabled" class="hidden">
+
+                      If possible, please ensure that you are running the latest drivers for your 
+
+					  graphics card and/or upgrade your card. 
+
+					  You can also <a href="http://www.khronos.org/webgl/wiki/BlacklistsAndWhitelists">
+
+					  check</a>, if your graphics card or driver is listed on your browser's 
+
+					  <a href="http://www.khronos.org/webgl/wiki/BlacklistsAndWhitelists">blacklist</a>.
+
+                  </div>
+
+              </div>
+
+          </div>
+
+
+
+          <div class="solution">
+
+              <!-- solution steps -->
+
+              <h2>Here is what you can do</h2>
+
+                <div id="upgrade-browser">
+
+                    <p><a id="upgrade-link" href="">You can upgrade <span id="name"></span> by clicking this&nbsp;link.</a></p>
+
+                </div>
+
+
+
+                <!--[if lt IE 8]>
+
+                  <div id="upgrade-ie">
+
+                      <p>You should upgrade to Internet Explorer <strong>9</strong> and then install the latest 
+
+                        <a href="http://get.adobe.com/flashplayer/">flash player</a>.</p>
+
+                  </div>
+
+                <![endif]-->
+
+                  
+
+               <!--[if IE 9]>
+
+              <div id="upgrade-chromeframe">
+
+                  <p><a href="http://www.google.com/chromeframe/eula.html"><strong>Install chrome frame</strong></a> 
+
+                  for best experience or <a href="http://get.adobe.com/flashplayer/">install the latest flash player</a> 
+
+                  if chome frame is not an&nbsp;option.</p>
+
+              </div>
+
+              <![endif]-->
+
+
+
+              <div id="get-browser" class="hidden">
+
+                <p>You may want to get another browser that supports WebGL. The following browsers support WebGL on 
+
+                    <span id="platform"></span>&nbsp;and allow to render X3DOM&nbsp;content:</p>
+
+
+
+                 <div id="browser-list"></div>
+
+              </div>
+
+
+
+              <div class="more">
+
+                  <h4><a href="#" id="more-link">Can't install software on your computer?</a></h4>
+
+                  <div id="more-content" class="hidden">
+
+                    <p>If you are in a corporate environment or governmental organization, it is quite possible the IT department
+
+                    prevents you from installing software on your computer. If you know this is the case, please contact your
+
+                    IT department and show them this&nbsp;message.</p>
+
+
+
+                    <p>In case you don't know if you can or cannot install software on your computer, just give it a try.
+
+                    If you find out it's not possible, please contact your system administrator, IT guy, or ask your
+
+                    boss or a colleague how to&nbsp;proceed.</p>
+
+                  </div>
+
+              </div>
+
+          </div>
+
+      </div>
+
+
+
+
+
+    <!--
+
+    Everything works fine.
+
+    -->
+
+    <div id="all-go" class="hidden">
+
+        <div class="head ok">
+
+            <h1>Your browser supports X3DOM</h1>
+
+            <p class="info">
+
+                You are surfing with <strong class="ok" id="info-browser-name"></strong>
+
+                <strong class="ok" id="info-browser-version"></strong>&nbsp;with&nbsp;WebGL&nbsp;<strong id="webgl-version"></strong>&nbsp;<span id="bind-word"></span>Flash <strong id="flash-version"></strong>&nbsp;installed.
+
+            </p>
+
+            <p class="betaInfo">
+
+            </p>
+
+        </div>
+
+
+
+        <div style="width:300px; height:300px; margin: 0 auto">
+
+        
+
+        <x3d id="logo" showLog="false" style="width:300px; height:300px">
+
+            <scene>
+
+                <viewpoint position='0 0 10' ></viewpoint>
+
+                <background></background>
+
+                <shape>
+
+                    <appearance>
+
+                        <material diffuseColor='0.603 0.894 0.909' ></material>
+
+                    </appearance>
+
+                    <box DEF='box' ></box>
+
+                </shape>
+
+            </scene>
+
+        </x3d>
+
+        </div>
+
+        <div style="clear:both"></div>
+
+        
+
+        <p>You should see a cyan box above and be able to move it around by dragging it with your&nbsp;mouse.</p>
+
+
+
+        <div class="solution">
+
+            
+
+            <div id="using-flash" class="warn hidden">
+
+                <p>
+
+                    With your current browser, X3DOM needs to use Flash to render the scenes.
+
+                    For best performance, consider enabling WebGL in your browser or updating to a
+
+                    recent browser which supports WebGL&nbsp;natively.
+
+                </p>
+
+            </div>
+
+            
+
+            <div id="using-wgl-ff" class="hidden">
+
+                <p style="margin-left: auto; margin-right: auto; width: 600px; color: #555; line-height: 1.2em;">
+
+                    If you only see a black blackground please check under "about:config" if 
+
+                    <br>
+
+                    webgl.shader_validator = true
+
+                    <br>
+
+                    If these two values are set and you still see a black background, please
+
+                    click onto the black area, then press the 'd' key, and scroll down to the log.
+
+                    <br>
+
+                    If there are any (red) error messages saying that e.g. the instruction limit is
+
+                    exceeded, then you need to upgrade to a newer or better graphics card.
+
+                </p>
+
+            </div>
+
+
+
+            <!--[if IE]>
+
+            <div id="upgrade-chromeframe">
+
+                <p>You may want to try <a href="http://www.google.com/chromeframe/eula.html"><strong>chrome frame</strong></a> for best X3DOM
+
+                experience in IE.</p>
+
+            </div>
+
+            <![endif]-->
+
+
+
+            <p>Still too slow? Upgrade to a faster graphics card with more memory to speed up your X3DOM&nbsp;experience.</p>
+
+            
+
+        </div>
+
+    </div>
+
+    
+
+    <div>
+
+        <p><a href="details/"><strong>Show Detailed Information</strong></a></p>
+
+    </div>
+
+
+
+    <div id="footer">
+
+        <p>Brought to you by the <a href="http://www.x3dom.org">X3DOM</a> project.</p>
+
+        <p>In case you have problems, please send an email describing your problem to the
+
+           <a href='http://www.x3dom.org/?page_id=3'>X3DOM mailing list</a>.</p>
+
+        <!--
+
+        <p>In case you have severe problems, please send an email describing your problem to
+
+           <a href='mailto:support@x3dom.org?subject=Problems with X3DOM'>support@x3dom.org</a>.</p>
+
+        -->
+
+    </div>
+
+  </div> <!-- /inner -->
+
+
+
+</div>
+
+</body>
+
+</html>
+
